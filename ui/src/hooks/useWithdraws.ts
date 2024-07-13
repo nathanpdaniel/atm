@@ -1,29 +1,27 @@
 import { Account } from '../Types/Account'
 
 export const useWithdraws = (account: Account) => {
-  const validateWithdrawAmount = (amount: number): string => {
+  const validateWithdrawAmount = (amount: number) => {
     if (amount > 200) {
-      return 'Maximum withdraw amount is $200'
+      throw new Error('Maximum withdraw amount is $200')
     }
 
     if (account.withdrawnToday + amount > 400) {
-      return 'Maximum daily withdraw amount is $400'
+      throw new Error('Maximum daily withdraw amount is $400')
     }
 
     if (amount % 5 !== 0) {
-      return 'Withdraw amount must be in increments of $5'
+      throw new Error('Withdraw amount must be in increments of $5')
     }
 
     if (
       account.type === 'credit' &&
       account.amount + account.creditLimit < amount
     ) {
-      return 'The requested amount exceeds credit limit'
+      throw new Error('The requested amount exceeds credit limit')
     } else if (account.amount < amount) {
-      return 'The requested amount exceeds available funds'
+      throw new Error('The requested amount exceeds available funds')
     }
-
-    return ''
   }
 
   const withdrawFunds = async (withdrawAmount: number): Promise<Account> => {

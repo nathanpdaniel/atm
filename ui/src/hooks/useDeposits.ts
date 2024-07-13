@@ -3,14 +3,14 @@ import { Account } from '../Types/Account'
 export const useDeposits = (account: Account) => {
   const validateDepositAmount = (depositAmount: number) => {
     if (depositAmount > 1000) {
-      return 'The maximum deposit amount is $1000'
+      throw new Error('The maximum deposit amount is $1000')
     }
 
     if (account.type === 'credit' && account.amount + depositAmount > 0) {
-      return 'The maximum deposit amount cannot exceed the current balance'
+      throw new Error(
+        'The maximum deposit amount cannot exceed the current balance'
+      )
     }
-
-    return ''
   }
 
   const depositFunds = async (depositAmount: number) => {
