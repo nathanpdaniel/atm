@@ -3,6 +3,9 @@ import { getAccount } from './accountHandler'
 
 export const withdrawal = async (accountID: string, amount: number) => {
   const account = await getAccount(accountID)
+
+  validateWithdraw(account, amount)
+
   account.amount -= amount
   const res = await query(
     `
@@ -55,7 +58,61 @@ export const withdrawnToday = async (accountID: string) => {
     [accountID, 'debit']
   )
 
-  return res.rows[0].debit_amount || 0
+  return parseInt(res.rows[0].debit_amount, 10) || 0
+}
+
+const validateWithdraw = (account: any, withdrawAmount: number) => {
+  // max $200 per transaction
+  if (withdrawAmount > 200) {
+    throw new Error('Maximum withdraw amount is $200')
+  }
+
+  // max $400 per day
+  if (account.withdrawnToday + withdrawAmount > 400) {
+    throw new Error(
+      `Maximum daily withdraw amount is $400 (${
+        account.withdrawnToday
+      } ${withdrawAmount} ${account.withdrawnToday + withdrawAmount})`
+    )
+  }
+
+  // must be increment of $5
+  if (withdrawAmount % 5 !== 0) {
+    throw new Error('Withdraw amount must be in increments of $5')
+  }
+
+  // funds available
+  if (['savings', 'checking'].includes(account.type)) {
+    confirmNonCreditFunds(account.amount, withdrawAmount)
+  } else {
+    confirmAvailableCredit(account.amount, account.credit_limit, withdrawAmount)
+  }
+}
+
+const confirmNonCreditFunds = (
+  currentAmount: number,
+  withdrawAmount: number
+) => {
+  if (currentAmount < withdrawAmount) {
+    throw new Error('The requested amount exceeds available funds.')
+  }
+}
+
+/**
+ * This makes an assumption that the sum of the credit limit and current amount on an account determine how much can be withdrawn
+ * As it is worded, it could be considered any amount up to the credit limit could be withdrawn, whether the user has the funds available
+ * ie. Credit limit is $1000 and the current amount is $-900. If a user requests a withdrawl of $200, the credit limit would be crossed, in which case,
+ * the assumption is made the transaction should be declined.
+ */
+const confirmAvailableCredit = (
+  currentAmount: number,
+  creditLimit: number,
+  withdrawAmount: number
+) => {
+  const amount = currentAmount + creditLimit
+  if (amount < withdrawAmount) {
+    throw new Error('The requested amount exceeds credit limit')
+  }
 }
 
 const addTransaction = async (
