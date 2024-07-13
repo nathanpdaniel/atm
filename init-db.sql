@@ -28,3 +28,18 @@ VALUES
     (3, 'Jills Credit', -3000, 'credit', 10000),
     (6, 'Bills Credit', -60000, 'credit', 60000),
     (9, 'Nancy Credit', -90000, 'credit', 100000);
+
+
+-- CREATE TABLE
+DROP TABLE IF EXISTS transactions;
+CREATE TABLE transactions (
+    tx_id SERIAL PRIMARY KEY,
+    account_number INTEGER NOT NULL,
+    amount INTEGER NOT NULL,
+    type VARCHAR NOT NULL,
+    tx_date DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
+-- LOAD DATA
+ALTER TABLE transactions ADD CONSTRAINT verify_type
+CHECK (type IN ('credit', 'debit'));
