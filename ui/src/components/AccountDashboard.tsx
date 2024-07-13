@@ -11,6 +11,7 @@ type AccountDashboardProps = {
 }
 
 export const AccountDashboard = (props: AccountDashboardProps) => {
+  const { signOut } = props
   const [depositAmount, setDepositAmount] = useState(0)
   const [withdrawAmount, setWithdrawAmount] = useState(0)
   const [account, setAccount] = useState(props.account)
@@ -27,13 +28,11 @@ export const AccountDashboard = (props: AccountDashboardProps) => {
 
   const handleWithdrawFunds = async () => {
     try {
-      const error = validateWithdrawAmount(withdrawAmount)
-      if (error) {
-        throw new Error(error)
-      }
+      validateWithdrawAmount(withdrawAmount)
 
       const updatedAccount = await withdrawFunds(withdrawAmount)
       setAccount(updatedAccount)
+      setWithdrawAmount(0)
     } catch (e) {
       setWithdrawError(String(e))
     }
@@ -46,19 +45,15 @@ export const AccountDashboard = (props: AccountDashboardProps) => {
 
   const handleDepositFunds = async () => {
     try {
-      const error = validateDepositAmount(depositAmount)
-      if (error) {
-        throw new Error(error)
-      }
+      validateDepositAmount(depositAmount)
 
       const updatedAccount = await depositFunds(depositAmount)
       setAccount(updatedAccount)
+      setDepositAmount(0)
     } catch (e) {
       setDepositError(String(e))
     }
   }
-
-  const { signOut } = props
 
   return (
     <Paper className="account-dashboard">
