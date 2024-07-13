@@ -45,5 +45,5 @@ After testing the project and reviewing code, we will discuss internally, and if
 If you have any questions while working on this project, feel free to reach out to michael.hartung@advisorsexcel.com and i'll get back to you within a day.
 
 Updates
-withdrawls-updates
-deposits-updates
+withdrawl-updates
+deposit-updates

@@ -29,6 +29,9 @@ export const withdrawal = async (accountID: string, amount: number) => {
 
 export const deposit = async (accountID: string, amount: number) => {
   const account = await getAccount(accountID)
+
+  validateDeposit(account, amount)
+
   account.amount += amount
   const res = await query(
     `
@@ -108,6 +111,18 @@ const confirmAvailableCredit = (
   const amount = currentAmount + creditLimit
   if (amount < withdrawAmount) {
     throw new Error('The requested amount exceeds credit limit')
+  }
+}
+
+const validateDeposit = (account: any, depositAmount: number) => {
+  if (depositAmount > 1000) {
+    throw new Error('The maximum deposit amount is $1000')
+  }
+
+  if (account.type === 'credit' && account.amount + depositAmount > 0) {
+    throw new Error(
+      'The maximum deposit amount cannot exceed the current balance'
+    )
   }
 }
 
