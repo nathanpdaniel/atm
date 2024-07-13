@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ChangeEventHandler, useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 import { Account } from '../Types/Account'
 import Paper from '@mui/material/Paper/Paper'
 import { Button, Card, CardContent, Grid, TextField } from '@mui/material'
@@ -15,7 +15,7 @@ export const AccountDashboard = (props: AccountDashboardProps) => {
   const [withdrawAmount, setWithdrawAmount] = useState(0)
   const [account, setAccount] = useState(props.account)
   const { validateWithdrawAmount, withdrawFunds } = useWithdraws(account)
-  const depositFunds = useDeposits(account)
+  const { validateDepositAmount, depositFunds } = useDeposits(account)
 
   const [withdrawError, setWithdrawError] = useState('')
   const [depositError, setDepositError] = useState('')
@@ -45,8 +45,17 @@ export const AccountDashboard = (props: AccountDashboardProps) => {
   }
 
   const handleDepositFunds = async () => {
-    const updatedAccount = await depositFunds(depositAmount)
-    setAccount(updatedAccount)
+    try {
+      const error = validateDepositAmount(depositAmount)
+      if (error) {
+        throw new Error(error)
+      }
+
+      const updatedAccount = await depositFunds(depositAmount)
+      setAccount(updatedAccount)
+    } catch (e) {
+      setDepositError(String(e))
+    }
   }
 
   const { signOut } = props
