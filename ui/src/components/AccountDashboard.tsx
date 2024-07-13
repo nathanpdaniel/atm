@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
-import { account } from '../Types/Account'
+import React, { ChangeEvent, ChangeEventHandler, useState } from 'react'
+import { Account } from '../Types/Account'
 import Paper from '@mui/material/Paper/Paper'
 import { Button, Card, CardContent, Grid, TextField } from '@mui/material'
 import { useWithdraws } from '../hooks/useWithdraws'
 import { useDeposits } from '../hooks/useDeposits'
 
 type AccountDashboardProps = {
-  account: account
+  account: Account
   signOut: () => Promise<void>
 }
 
@@ -14,12 +14,34 @@ export const AccountDashboard = (props: AccountDashboardProps) => {
   const [depositAmount, setDepositAmount] = useState(0)
   const [withdrawAmount, setWithdrawAmount] = useState(0)
   const [account, setAccount] = useState(props.account)
-  const withdrawFunds = useWithdraws(account)
+  const { validateWithdrawAmount, withdrawFunds } = useWithdraws(account)
   const depositFunds = useDeposits(account)
 
+  const [withdrawError, setWithdrawError] = useState('')
+  const [depositError, setDepositError] = useState('')
+
+  const handleChangeWithdrawAmount = (e: ChangeEvent<HTMLInputElement>) => {
+    setWithdrawAmount(+e.target.value)
+    setWithdrawError('')
+  }
+
   const handleWithdrawFunds = async () => {
-    const updatedAccount = await withdrawFunds(withdrawAmount)
-    setAccount(updatedAccount)
+    try {
+      const error = validateWithdrawAmount(withdrawAmount)
+      if (error) {
+        throw new Error(error)
+      }
+
+      const updatedAccount = await withdrawFunds(withdrawAmount)
+      setAccount(updatedAccount)
+    } catch (e) {
+      setWithdrawError(String(e))
+    }
+  }
+
+  const handleChangeDepositAmount = (e: ChangeEvent<HTMLInputElement>) => {
+    setDepositAmount(+e.target.value)
+    setDepositError('')
   }
 
   const handleDepositFunds = async () => {
@@ -51,7 +73,9 @@ export const AccountDashboard = (props: AccountDashboardProps) => {
                   display: 'flex',
                   margin: 'auto',
                 }}
-                onChange={(e) => setDepositAmount(+e.target.value)}
+                onChange={handleChangeDepositAmount}
+                error={!!depositError}
+                helperText={depositError}
               />
               <Button
                 variant="contained"
@@ -79,7 +103,9 @@ export const AccountDashboard = (props: AccountDashboardProps) => {
                   display: 'flex',
                   margin: 'auto',
                 }}
-                onChange={(e) => setWithdrawAmount(+e.target.value)}
+                onChange={handleChangeWithdrawAmount}
+                error={!!withdrawError}
+                helperText={withdrawError}
               />
               <Button
                 variant="contained"

@@ -1,23 +1,32 @@
-import { account } from '../Types/Account'
+import { Account } from '../Types/Account'
 
-export const useWithdraws = (account: account) => {
-  const validateWithdrawAmount = (amount: number): boolean => {
+export const useWithdraws = (account: Account) => {
+  const validateWithdrawAmount = (amount: number): string => {
     if (amount > 200) {
-      return false
+      return 'Maximum withdraw amount is $200'
     }
 
-    if (amount > 400) {
-      return false
+    if (account.withdrawnToday + amount > 400) {
+      return 'Maximum daily withdraw amount is $400'
     }
 
     if (amount % 5 !== 0) {
-      return false
+      return 'Withdraw amount must be in increments of $5'
     }
 
-    return true
+    if (
+      account.type === 'credit' &&
+      account.amount + account.creditLimit < amount
+    ) {
+      return 'The requested amount exceeds credit limit'
+    } else if (account.amount < amount) {
+      return 'The requested amount exceeds available funds'
+    }
+
+    return ''
   }
 
-  const withdrawFunds = async (withdrawAmount: number): Promise<account> => {
+  const withdrawFunds = async (withdrawAmount: number): Promise<Account> => {
     const requestOptions = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -28,6 +37,11 @@ export const useWithdraws = (account: account) => {
       requestOptions
     )
     const data = await response.json()
+
+    if (data.error) {
+      throw new Error(data.error)
+    }
+
     return {
       accountNumber: data.account_number,
       name: data.name,
@@ -35,8 +49,8 @@ export const useWithdraws = (account: account) => {
       type: data.type,
       creditLimit: data.credit_limit,
       withdrawnToday: data.withdrawnToday,
-    } as account
+    } as Account
   }
 
-  return withdrawFunds
+  return { validateWithdrawAmount, withdrawFunds }
 }

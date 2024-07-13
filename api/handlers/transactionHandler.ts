@@ -69,11 +69,7 @@ const validateWithdraw = (account: any, withdrawAmount: number) => {
 
   // max $400 per day
   if (account.withdrawnToday + withdrawAmount > 400) {
-    throw new Error(
-      `Maximum daily withdraw amount is $400 (${
-        account.withdrawnToday
-      } ${withdrawAmount} ${account.withdrawnToday + withdrawAmount})`
-    )
+    throw new Error('Maximum daily withdraw amount is $400')
   }
 
   // must be increment of $5

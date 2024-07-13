@@ -3,11 +3,11 @@ import './App.css'
 import { Grid } from '@mui/material'
 import { SignIn } from './components/SignIn'
 import { AccountDashboard } from './components/AccountDashboard'
-import { account } from './Types/Account'
+import { Account } from './Types/Account'
 
 export const App = () => {
   const [accountNumberError, setAccountNumberError] = useState(false)
-  const [account, setAccount] = useState<account | undefined>(undefined)
+  const [account, setAccount] = useState<Account | undefined>(undefined)
 
   const signIn = async (accountNumber: number) => {
     const response = await fetch(

@@ -1,6 +1,6 @@
-import { account } from '../Types/Account'
+import { Account } from '../Types/Account'
 
-export const useDeposits = (account: account) => {
+export const useDeposits = (account: Account) => {
   const depositFunds = async (depositAmount: Number) => {
     const requestOptions = {
       method: 'PUT',
@@ -19,7 +19,7 @@ export const useDeposits = (account: account) => {
       type: data.type,
       creditLimit: data.credit_limit,
       withdrawnToday: data.withdrawnToday,
-    } as account
+    } as Account
   }
 
   return depositFunds
